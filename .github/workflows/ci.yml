@@ -21,17 +21,21 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
+      ## gradle test
+      - name: Build with Gradle
+        run: ./gradlew test --stacktrace
+
       ## gradle build
       - name: Build with Gradle
-        run: ./gradlew bootJar
+        run: ./gradlew bootJar --stacktrace -x test
 
       ## 웹 이미지 빌드 및 도커허브에 push
       - name: web docker build and push
         run: |
-          apt update
-          apt install -y wget
-          wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
-          chmod +x /usr/local/bin/yq
+          sudo apt update
+          sudo apt install -y wget
+          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
           export APPLICATION_NAME=$(yq e '.spring.application.name' ./src/main/resources/application.yml)
           export VERSION=$(awk '/version =/{print $NF}' build.gradle | tr -d "'")
           docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
