@@ -28,6 +28,11 @@ jobs:
       ## 웹 이미지 빌드 및 도커허브에 push
       - name: web docker build and push
         run: |
+          apt update
+          apt install -y wget
+          wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          chmod +x /usr/local/bin/yq
+          export APPLICATION_NAME=$(yq e '.spring.application.name' ./src/main/resources/application.yml)
           export VERSION=$(awk '/version =/{print $NF}' build.gradle | tr -d "'")
           docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
           docker build -t ${{ secrets.DOCKER_USERNAME }}/service-discovery:$VERSION .
