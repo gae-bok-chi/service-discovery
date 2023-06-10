@@ -1,6 +1,7 @@
 name: Java CI with Gradle
 
 on:
+  workflow_dispatch:
   push:
     branches: [ "main" ]
 
@@ -22,7 +23,7 @@ jobs:
           distribution: 'temurin'
 
       ## gradle test
-      - name: Build with Gradle
+      - name: Test with Gradle
         run: ./gradlew test --stacktrace
 
       ## gradle build
@@ -39,5 +40,5 @@ jobs:
           export APPLICATION_NAME=$(yq e '.spring.application.name' ./src/main/resources/application.yml)
           export VERSION=$(awk '/version =/{print $NF}' build.gradle | tr -d "'")
           docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/service-discovery:$VERSION .
-          docker push ${{ secrets.DOCKER_USERNAME }}/service-discovery:$VERSION
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/$APPLICATION_NAME:$VERSION .
+          docker push ${{ secrets.DOCKER_USERNAME }}/$APPLICATION_NAME:$VERSION
