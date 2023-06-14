@@ -56,21 +56,6 @@ jobs:
           file: dockerfile-arm
           context: .
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/${{ steps.get-version-name.outputs.APPLICATION_NAME }}:${{ steps.get-version-name.outputs.VERSION }}
+          tags: ${{ secrets.DOCKER_USERNAME }}/${{ steps.get-version-name.outputs.APPLICATION_NAME }}:${{ steps.get-version-name.outputs.VERSION }}-arm
           platforms: |
             linux/arm/v8
-
-      ## 웹 이미지 빌드 및 도커허브에 push
-      - name: web docker build and push
-        run: |
-          sudo apt update
-          sudo apt install -y wget
-          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
-          sudo chmod +x /usr/local/bin/yq
-          export APPLICATION_NAME=$(yq e '.spring.application.name' ./src/main/resources/application.yml)
-          export VERSION=$(awk '/version =/{print $NF}' build.gradle | tr -d "'")
-          docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/$APPLICATION_NAME:$VERSION .
-          docker push ${{ secrets.DOCKER_USERNAME }}/$APPLICATION_NAME:$VERSION
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/$APPLICATION_NAME:$VERSION-arm -f dockerfile-arm .
-          docker push ${{ secrets.DOCKER_USERNAME }}/$APPLICATION_NAME:$VERSION-arm
