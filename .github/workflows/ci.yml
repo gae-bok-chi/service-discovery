@@ -30,6 +30,14 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew bootJar --stacktrace -x test
 
+      - name: Get Version, Name
+        id: get-version-name
+        run: |
+          export APPLICATION_NAME=$(yq e '.spring.application.name' ./src/main/resources/application.yml)
+          export VERSION=$(awk '/version =/{print $NF}' build.gradle | tr -d "'")
+          echo "APPLICATION_NAME=$APPLICATION_NAME" >> $GITHUB_OUTPUT
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
 
@@ -47,7 +55,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/$APPLICATION_NAME:$VERSION
+          tags: ${{ secrets.DOCKER_USERNAME }}/${{ steps.get-version-name.APPLICATION_NAME }}:${{ steps.get-version-name.VERSION }}
           platforms: |
             linux/amd64
             linux/arm64
